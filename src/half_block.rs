@@ -55,13 +55,28 @@ fn half_block_for(top: [u8; 4], bot: [u8; 4]) -> HbCell {
     let on_top = top[3] >= 128;
     let on_bot = bot[3] >= 128;
     if !on_top && !on_bot {
-        return HbCell { ch: ' ', fg: None, bg: None, transparent: true };
+        return HbCell {
+            ch: ' ',
+            fg: None,
+            bg: None,
+            transparent: true,
+        };
     }
     if on_top && !on_bot {
-        return HbCell { ch: '▀', fg: Some((top[0], top[1], top[2])), bg: None, transparent: false };
+        return HbCell {
+            ch: '▀',
+            fg: Some((top[0], top[1], top[2])),
+            bg: None,
+            transparent: false,
+        };
     }
     if !on_top && on_bot {
-        return HbCell { ch: '▄', fg: Some((bot[0], bot[1], bot[2])), bg: None, transparent: false };
+        return HbCell {
+            ch: '▄',
+            fg: Some((bot[0], bot[1], bot[2])),
+            bg: None,
+            transparent: false,
+        };
     }
     HbCell {
         ch: '▀',
@@ -89,29 +104,49 @@ pub fn crop_frames_to_union(groups: Vec<Vec<HbFrame>>) -> Vec<Vec<HbFrame>> {
             for cy in 0..h {
                 for cx in 0..w {
                     if !frame.cell_at(cy, cx).transparent {
-                        if cx < min_x { min_x = cx; }
-                        if cx > max_x { max_x = cx; }
-                        if cy < min_y { min_y = cy; }
-                        if cy > max_y { max_y = cy; }
+                        if cx < min_x {
+                            min_x = cx;
+                        }
+                        if cx > max_x {
+                            max_x = cx;
+                        }
+                        if cy < min_y {
+                            min_y = cy;
+                        }
+                        if cy > max_y {
+                            max_y = cy;
+                        }
                     }
                 }
             }
         }
     }
-    if min_x > max_x { return groups; }
+    if min_x > max_x {
+        return groups;
+    }
     let new_w = max_x - min_x + 1;
     let new_h = max_y - min_y + 1;
-    groups.into_iter().map(|group| {
-        group.into_iter().map(|f| {
-            let mut cells = Vec::with_capacity((new_w as usize) * (new_h as usize));
-            for cy in min_y..=max_y {
-                for cx in min_x..=max_x {
-                    cells.push(f.cell_at(cy, cx));
-                }
-            }
-            HbFrame { width_cells: new_w, height_cells: new_h, cells }
-        }).collect()
-    }).collect()
+    groups
+        .into_iter()
+        .map(|group| {
+            group
+                .into_iter()
+                .map(|f| {
+                    let mut cells = Vec::with_capacity((new_w as usize) * (new_h as usize));
+                    for cy in min_y..=max_y {
+                        for cx in min_x..=max_x {
+                            cells.push(f.cell_at(cy, cx));
+                        }
+                    }
+                    HbFrame {
+                        width_cells: new_w,
+                        height_cells: new_h,
+                        cells,
+                    }
+                })
+                .collect()
+        })
+        .collect()
 }
 
 // Append the half-block render of `frame` at terminal cell (row, col) into `buf`.
@@ -122,7 +157,14 @@ pub fn crop_frames_to_union(groups: Vec<Vec<HbFrame>>) -> Vec<Vec<HbFrame>> {
 //   - Only emit a cursor-position escape on the first non-transparent cell of
 //     each row, or after a transparent gap / clipped cell — otherwise rely on
 //     the cursor advancing naturally as we write each half-block char.
-pub fn write_frame(buf: &mut String, frame: &HbFrame, row: u16, col: u16, max_rows: u16, max_cols: u16) {
+pub fn write_frame(
+    buf: &mut String,
+    frame: &HbFrame,
+    row: u16,
+    col: u16,
+    max_rows: u16,
+    max_cols: u16,
+) {
     buf.push_str("\x1b[0m");
     let mut prev_fg: Option<(u8, u8, u8)> = None;
     let mut prev_bg: Option<(u8, u8, u8)> = None;
@@ -146,14 +188,18 @@ pub fn write_frame(buf: &mut String, frame: &HbFrame, row: u16, col: u16, max_ro
             }
             if cell.fg != prev_fg {
                 match cell.fg {
-                    Some((rc, gc, bc)) => { let _ = write!(buf, "\x1b[38;2;{};{};{}m", rc, gc, bc); }
+                    Some((rc, gc, bc)) => {
+                        let _ = write!(buf, "\x1b[38;2;{};{};{}m", rc, gc, bc);
+                    }
                     None => buf.push_str("\x1b[39m"),
                 }
                 prev_fg = cell.fg;
             }
             if cell.bg != prev_bg {
                 match cell.bg {
-                    Some((br, bg, bb)) => { let _ = write!(buf, "\x1b[48;2;{};{};{}m", br, bg, bb); }
+                    Some((br, bg, bb)) => {
+                        let _ = write!(buf, "\x1b[48;2;{};{};{}m", br, bg, bb);
+                    }
                     None => buf.push_str("\x1b[49m"),
                 }
                 prev_bg = cell.bg;

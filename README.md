@@ -58,7 +58,23 @@ scamp
 
 ## Configure
 
-Two environment variables.
+You can configure scamp from:
+
+1. `~/.config/scamp/config.toml` (persistent defaults)
+2. environment variables (override config)
+3. CLI flags (override both)
+
+Example `~/.config/scamp/config.toml`:
+```toml
+cat = "gray"
+renderer = "sixel"
+pets = 2
+event_mode = true
+debug_overlay = false
+no_relaunch = true
+```
+
+Environment variables:
 
 `SCAMP_CAT` pins a specific cat color (default behavior is **random per launch** so each session feels a little different):
 ```
@@ -72,10 +88,29 @@ Unset to go back to the random pick on each launch.
 `SCAMP_RENDERER` overrides the auto-detected renderer:
 ```
 $env:SCAMP_RENDERER="sixel"      # force pixel-perfect sixel
+$env:SCAMP_RENDERER="kitty"      # kitty mode (currently sixel-compatible path)
 $env:SCAMP_RENDERER="halfblock"  # force the half-block fallback
 ```
 
 By default scamp picks sixel when it detects a sixel-capable terminal (Windows Terminal, WezTerm, iTerm2, Konsole, ghostty, foot, mlterm, contour) and half-block everywhere else.
+
+CLI flags:
+
+```bash
+scamp --list-cats
+scamp --cat gray
+scamp --pets 3
+scamp --event-mode
+scamp --debug-overlay
+scamp --no-relaunch
+scamp --renderer halfblock
+```
+
+Live controls while scamp is running:
+
+- `Ctrl+P` — pet all cats (happy mood)
+- `Ctrl+F` — feed all cats (playful mood / zoomies)
+- `Ctrl+Y` — toggle help overlay
 
 ## What's inside
 
